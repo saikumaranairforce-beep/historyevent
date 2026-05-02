@@ -1,9 +1,9 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from supabase import create_client
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 # Initialize Supabase
 supabase_url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
@@ -45,5 +45,8 @@ def generate():
     return jsonify({"post": post_text})
 
 # For local development
-if __name__ == '__main__':
-    app.run(port=5000,debug=True)
+#if __name__ == '__main__':
+#    app.run(port=5000,debug=True)
+@app.route('/')
+def home():
+    return render_template('index.html')
