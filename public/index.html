@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PK Digital AI - Content Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-900 selection:bg-indigo-100">
+
+    <div class="max-w-xl mx-auto px-4 py-8">
+        
+        <!-- Header Section -->
+        <header class="text-center mb-8">
+            <div class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-xl shadow-indigo-200">
+                <i class="fa-solid fa-microchip animate-pulse"></i> Engine Active
+            </div>
+            <h1 class="text-3xl font-black tracking-tight text-slate-900 mb-1">PK Digital AI</h1>
+            <p class="text-slate-500 text-sm font-medium">Daily Arivu & Time Traveler Archivist</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="glass border border-white p-2 rounded-3xl shadow-2xl mb-6 flex flex-col md:flex-row gap-2">
+            <input 
+                type="text" 
+                id="searchKeyword"
+                placeholder="Enter topic (e.g. Science, India)" 
+                class="flex-grow p-4 bg-transparent outline-none text-lg font-medium placeholder:text-slate-300"
+            >
+            <button 
+                onclick="generatePost()"
+                id="mainBtn"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-2xl font-bold transition-all active:scale-95 shadow-lg shadow-indigo-100"
+            >
+                Generate
+            </button>
+        </div>
+
+        <!-- Progress Indicator (Hidden by default) -->
+        <div id="loading" class="hidden text-center py-10">
+            <div class="inline-block w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p class="text-slate-400 font-bold text-xs uppercase tracking-widest">Consulting the Archives...</p>
+        </div>
+
+        <!-- Result Card -->
+        <div id="resultCard" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div class="bg-white p-8 rounded-[2rem] shadow-2xl border border-white relative overflow-hidden">
+                <!-- Decorative element -->
+                <div class="absolute -top-6 -right-6 w-24 h-24 bg-indigo-50 rounded-full opacity-50"></div>
+                
+                <div id="postContent" class="text-slate-800 text-lg leading-relaxed whitespace-pre-wrap font-medium relative z-10 mb-8">
+                    <!-- Python Response will appear here -->
+                </div>
+
+                <button 
+                    onclick="copyToClipboard()"
+                    id="copyBtn"
+                    class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-all"
+                >
+                    <i class="fa-solid fa-copy"></i> Copy Post
+                </button>
+            </div>
+            
+            <p class="text-center text-[10px] text-slate-400 mt-6 font-bold uppercase tracking-widest">
+                Successfully archived to Supabase for your Book
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        async function generatePost() {
+            const keyword = document.getElementById('searchKeyword').value;
+            const mainBtn = document.getElementById('mainBtn');
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            const postContent = document.getElementById('postContent');
+
+            if (!keyword) return alert("Please enter a topic");
+
+            // UI State: Loading
+            mainBtn.disabled = true;
+            loading.classList.remove('hidden');
+            resultCard.classList.add('hidden');
+
+            try {
+                // Call your Flask API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: keyword })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    postContent.innerText = data.post;
+                    resultCard.classList.remove('hidden');
+                } else {
+                    alert(data.error || "System Error");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Connection failed to Python server.");
+            } finally {
+                loading.classList.add('hidden');
+                mainBtn.disabled = false;
+            }
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('postContent').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check text-green-400"></i> Copied to Clipboard';
+                btn.classList.add('ring-4', 'ring-green-100');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('ring-4', 'ring-green-100');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
