@@ -39,7 +39,7 @@ def generate():
         "event_year": str(main_event['year']),
         "event_description": main_event['event'],
         "generated_post": post_text,
-        "keyword": keyword
+        "search_keyword": keyword
     }).execute()
 
     return jsonify({"post": post_text})
