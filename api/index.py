@@ -35,7 +35,7 @@ def generate():
     post_text = gemini_res.json()['candidates'][0]['content']['parts'][0]['text']
 
     # 3. Save to Supabase for your Book
-    supabase.table('reminiscences_archive').insert({
+    supabase.table('historical_posts').insert({
         "event_year": str(main_event['year']),
         "event_description": main_event['event'],
         "generated_post": post_text,
